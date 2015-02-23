@@ -1,4 +1,4 @@
-@functions {
+﻿@functions {
     // To support the layout classifaction below. Implementing as a razor function because we can, could otherwise be a Func<string[], string, string> in the code block following.
     string CalcuClassify(string[] zoneNames, string classNamePrefix)
     {
@@ -24,7 +24,7 @@
     ***************************************************************/
 
     Script.Require("ShapesBase");
-    Script.Require("APA-Style"); // optional
+    // optional Script.Require("APA-Style");
     Script.Require("IE-10");
     Script.Require("html5shiv").AtHead().UseCondition("lt ie 9");
     Script.Require("respondJS").AtHead().UseCondition("lt ie 9");

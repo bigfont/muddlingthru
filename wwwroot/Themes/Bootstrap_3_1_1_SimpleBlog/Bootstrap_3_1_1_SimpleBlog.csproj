@@ -206,6 +206,13 @@
   <ItemGroup>
     <Content Include="Styles\less\bigfont\_responsive-adwords.less" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Parts.MenuWidget.cshtml" />
+    <Content Include="Views\Parts.Search.SearchForm.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\MenuItemLink.cshtml" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
