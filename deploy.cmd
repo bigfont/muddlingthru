@@ -75,11 +75,10 @@ IF /I "Orchard-1.9\src\Orchard.sln" NEQ "" (
 
 :: 2. Build to the temporary path
 IF /I "%IN_PLACE_DEPLOYMENT%" NEQ "1" (
-  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard-1.9\src\Orchard.Web\Orchard.Web.csproj" /nologo /verbosity:m /t:Precompiled /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="%DEPLOYMENT_TEMP%";AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release /p:SolutionDir="%DEPLOYMENT_SOURCE%\Orchard-1.9\src\\" %SCM_BUILD_ARGS%
+  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard-1.9\Orchard.proj" /nologo /verbosity:m /t:Precompiled /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="%DEPLOYMENT_TEMP%";AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release /p:SolutionDir="%DEPLOYMENT_SOURCE%\Orchard-1.9\src\\" %SCM_BUILD_ARGS% /p:VisualStudioVersion=14.0
 ) ELSE (
   call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard-1.9\src\Orchard.Web\Orchard.Web.csproj" /nologo /verbosity:m /t:Precompiled /p:AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release /p:SolutionDir="%DEPLOYMENT_SOURCE%\Orchard-1.9\src\\" %SCM_BUILD_ARGS%
 )
-
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 3. KuduSync
