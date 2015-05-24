@@ -2,7 +2,7 @@
 
 :: ----------------------
 :: KUDU Deployment Script
-:: Version: 0.2.2
+:: Version: 0.1.11
 :: ----------------------
 
 :: Prerequisites
@@ -20,7 +20,36 @@ IF %ERRORLEVEL% NEQ 0 (
 
 setlocal enabledelayedexpansion
 
-SET ARTIFACTS=%~dp0%..\artifacts
+
+:: #region ORCHARD ENVIRONMENTAL VARIABLES
+:: ------------
+SET SITE_DIR=%~dp0%..
+SET DEPLOYMENT_SOURCE=%~dp0%\Orchard-1.9
+SET DEPLOYMENT_TARGET=%SITE_DIR%\wwwroot
+SET DEPLOYMENT_TEMP="%DEPLOYMENT_SOURCE%\build\precompiled"
+SET CLEAN_LOCAL_DEPLOYMENT_TEMP=true
+:: ---------------
+:: #endregion ORCHARD ENVIRONMENTAL VARIABLES
+
+
+SET ARTIFACTS=%SITE_DIR%\artifacts
+
+echo SITE_DIR: %SITE_DIR%
+echo DEPLOYMENT_SOURCE: %DEPLOYMENT_SOURE%
+echo DEPLOYMENT_TARGET: %DEPLOYMENT_TARGET%
+echo DEPLOYMENT_TEMP: %DEPLOYMENT_TEMP%
+echo CLEAN: %CLEAN_LOCAL_DEPLOYMENT_TEMP%
+echo ARTIFACTS: %ARTIFACTS%
+
+:
+:: #region For local testing, create artifacts dir
+:: ------------
+IF NOT EXIST ARTIFACTS (
+  mkdir ARTIFACTS
+)
+:: ------------
+:: #endregion
+
 
 IF NOT DEFINED DEPLOYMENT_SOURCE (
   SET DEPLOYMENT_SOURCE=%~dp0%.
@@ -68,17 +97,18 @@ IF NOT DEFINED MSBUILD_PATH (
 echo Handling .NET Web Application deployment.
 
 :: 1. Restore NuGet packages
-IF /I "Orchard-1.9\src\Orchard.sln" NEQ "" (
-  call :ExecuteCmd nuget restore "%DEPLOYMENT_SOURCE%\Orchard-1.9\src\Orchard.sln"
+IF /I "src\Orchard.sln" NEQ "" (
+  call :ExecuteCmd nuget restore "%DEPLOYMENT_SOURCE%\src\Orchard.sln"
   IF !ERRORLEVEL! NEQ 0 goto error
 )
 
 :: 2. Build to the temporary path
 IF /I "%IN_PLACE_DEPLOYMENT%" NEQ "1" (
-  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard-1.9\Orchard.proj" /nologo /verbosity:m /t:Precompiled /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir="%DEPLOYMENT_TEMP%";AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release /p:SolutionDir="%DEPLOYMENT_SOURCE%\Orchard-1.9\src\\" %SCM_BUILD_ARGS% /p:VisualStudioVersion=14.0
+  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard.proj" /nologo /verbosity:m /t:Precompiled /p:AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release;VisualStudioVersion=14.0 /p:SolutionDir="%DEPLOYMENT_SOURCE%\src\\" %SCM_BUILD_ARGS% 
 ) ELSE (
-  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard-1.9\src\Orchard.Web\Orchard.Web.csproj" /nologo /verbosity:m /t:Precompiled /p:AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release /p:SolutionDir="%DEPLOYMENT_SOURCE%\Orchard-1.9\src\\" %SCM_BUILD_ARGS%
+  call :ExecuteCmd "%MSBUILD_PATH%" "%DEPLOYMENT_SOURCE%\Orchard.proj" /nologo /verbosity:m /t:Precompiled /p:AutoParameterizationWebConfigConnectionStrings=false;Configuration=Release;VisualStudioVersion=14.0 /p:SolutionDir="%DEPLOYMENT_SOURCE%\src\\" %SCM_BUILD_ARGS%
 )
+
 IF !ERRORLEVEL! NEQ 0 goto error
 
 :: 3. KuduSync
@@ -106,6 +136,7 @@ exit /b %ERRORLEVEL%
 :error
 endlocal
 echo An error has occurred during web site deployment.
+pause > nul
 call :exitSetErrorLevel
 call :exitFromFunction 2>nul
 
